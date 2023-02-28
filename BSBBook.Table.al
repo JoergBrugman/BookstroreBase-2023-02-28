@@ -3,6 +3,7 @@
 /// </summary>
 table 50100 "BSB Book"
 {
+    // Kommentar aus Task2
     Caption = 'Book';
 
     fields
