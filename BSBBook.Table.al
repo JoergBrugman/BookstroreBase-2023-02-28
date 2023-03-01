@@ -3,9 +3,9 @@
 /// </summary>
 table 50100 "BSB Book"
 {
-    // Kommentar Task1
-    // Kommentar aus Task2
     Caption = 'Book';
+    DataCaptionFields = "No.", Description;
+    LookupPageId = "BSB Book List";
 
     fields
     {
@@ -17,6 +17,12 @@ table 50100 "BSB Book"
         field(2; Description; Text[100])
         {
             Caption = 'Description';
+
+            trigger OnValidate()
+            begin
+                if ("Search Description" = UpperCase(xRec.Description)) or ("Search Description" = '') then
+                    "Search Description" := CopyStr(Description, 1, MaxStrLen("Search Description"));
+            end;
         }
         field(3; "Search Description"; Code[100])
         {
@@ -36,13 +42,11 @@ table 50100 "BSB Book"
         {
             Caption = 'Created';
             Editable = false;
-            //TODO Automatisch füllen
         }
         field(8; "Last Date Modified"; Date)
         {
             Caption = 'Last Date Modified';
             Editable = false;
-            //TODO Automatisch füllen
         }
         field(10; Author; Text[50])
         {
@@ -80,5 +84,82 @@ table 50100 "BSB Book"
         key(PK; "No.") { Clustered = true; }
     }
 
-    //TODO Bücher dürfen nicht gelöscht werden
+    fieldgroups
+    {
+        fieldgroup(DropDown; "No.", Description, Author) { }
+    }
+
+    #region Table Trigger
+    trigger OnInsert()
+    begin
+        Created := Today;
+    end;
+
+    trigger OnModify()
+    begin
+        "Last Date Modified" := Today;
+    end;
+
+    trigger OnRename()
+    begin
+        "Last Date Modified" := Today;
+    end;
+
+    trigger OnDelete()
+    begin
+        Error(OnDeleteErr, TableCaption);
+    end;
+    #endregion Table Trigger
+
+    /// <summary>
+    /// TestBlocked prüft, prüft das Buch im Rec und gibt einen Fehler aus, wenn es gesperrt ist.
+    /// </summary>
+    procedure TestBlocked()
+    begin
+        TestBlocked(Rec);
+    end;
+
+    /// <summary>
+    /// TestBlocked prüft das Buch im Parameter BSBBook und gibt einen Fehler aus, wenn es gesperrt ist.
+    /// </summary>
+    /// <param name="BSBBook">BSBBook: Record des zu prüfendes Buchs</param>
+    procedure TestBlocked(BSBBook: Record "BSB Book")
+    begin
+        BSBBook.TestField(Blocked, false);
+    end;
+
+    /// <summary>
+    /// TestBlocked liest das Buch zum Code ein und gibt einen Fehler aus, wenn es gesperrt ist.
+    /// </summary>
+    /// <param name="BookNo">BookNo: Code des zu prüfenden Buchs</param>
+    procedure TestBlocked(BookNo: Code[20])
+    var
+        BSBBook: Record "BSB Book";
+    begin
+        if (BookNo <> '') then begin
+            BSBBook.Get(BookNo);
+            TestBlocked(BSBBook);
+        end;
+    end;
+
+    procedure ShowCard()
+    begin
+        ShowCard(Rec);
+    end;
+
+    procedure ShowCard(BSBBook: Record "BSB Book")
+    begin
+        page.Run(Page::"BSB Book Card", BSBBook);
+    end;
+
+    procedure ShowCard(BookNo: Code[20])
+    var
+        BSBBook: Record "BSB Book";
+    begin
+        if BSBBook.Get(BookNo) then
+            ShowCard(BSBBook);
+    end;
+
+    var
+        OnDeleteErr: Label 'A %1 cannot be deleted', Comment = '"DEU"=Ein %1 kann nicht gelöscht werden';
 }
