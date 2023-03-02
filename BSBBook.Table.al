@@ -173,4 +173,5 @@ table 50100 "BSB Book"
 
     var
         OnDeleteErr: Label 'A %1 cannot be deleted', Comment = '"DEU"=Ein %1 kann nicht gelöscht werden';
+        XXXXXMsg: Label 'XYXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 }
