@@ -106,7 +106,13 @@ table 50100 "BSB Book"
     end;
 
     trigger OnDelete()
+    var
+        IsHandled: Boolean;
     begin
+        OnBeforeOnDelete(Rec, xRec, IsHandled);
+        if IsHandled then
+            exit;
+
         Error(OnDeleteErr, TableCaption);
     end;
     #endregion Table Trigger
@@ -158,6 +164,11 @@ table 50100 "BSB Book"
     begin
         if BSBBook.Get(BookNo) then
             ShowCard(BSBBook);
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnBeforeOnDelete(var Rec: Record "BSB Book"; var xRec: Record "BSB Book"; var IsHandled: Boolean)
+    begin
     end;
 
     var
